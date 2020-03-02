@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name canfd-usb-nucleo-expb-cache)(type Legacy)(uri ${KIPRJMOD}/canfd-usb-nucleo-expb-cache.lib)(options "")(descr ""))
+  (lib (name canfd-usb-nucleo)(type Legacy)(uri ${KIPRJMOD}/canfd-usb-nucleo.lib)(options "")(descr ""))
+)
