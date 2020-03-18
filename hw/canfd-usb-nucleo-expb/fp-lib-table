@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name canfd-usb-nucleo-expb)(type KiCad)(uri "E:/Circuit design/EmbeddedSchool-canfd-usb/canfd-to-usb/hw/canfd-usb-nucleo-expb.pretty")(options "")(descr ""))
+  (lib (name can-usb)(type KiCad)(uri ${KIPRJMOD}/can-usb.pretty)(options "")(descr ""))
+)
