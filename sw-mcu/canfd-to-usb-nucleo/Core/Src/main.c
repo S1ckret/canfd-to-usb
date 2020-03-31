@@ -24,7 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "heartbeatTask.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,12 +43,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* Definitions for heartbeatTask */
-osThreadId_t heartbeatTaskHandle;
-const osThreadAttr_t heartbeatTask_attributes = {
-  .name = "heartbeatTask",
-  .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128
-};
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -120,7 +115,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of heartbeatTask */
-  heartbeatTaskHandle = osThreadNew(StartHeartbeatTask, NULL, &heartbeatTask_attributes);
+  createHeartbeatTask();
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -221,16 +216,7 @@ static void MX_GPIO_Init(void)
 * @retval None
 */
 /* USER CODE END Header_StartHeartbeatTask */
-void StartHeartbeatTask(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END 5 */ 
-}
+
 
 /**
   * @brief  Period elapsed callback in non blocking mode
