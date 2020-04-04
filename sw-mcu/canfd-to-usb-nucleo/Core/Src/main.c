@@ -26,6 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "heartbeatTask.h"
+#include "fdCan1Task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,14 +47,6 @@
 FDCAN_HandleTypeDef hfdcan1;
 FDCAN_HandleTypeDef hfdcan2;
 FDCAN_HandleTypeDef hfdcan3;
-
-/* Definitions for heartbeatTask */
-osThreadId_t heartbeatTaskHandle;
-const osThreadAttr_t heartbeatTask_attributes = {
-  .name = "heartbeatTask",
-  .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128
-};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -136,8 +129,8 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of heartbeatTask */
-  heartbeatTaskHandle = osThreadNew(StartHeartbeatTask, NULL, &heartbeatTask_attributes);
-
+  createHeartbeatTask();
+  createFdCan1Task();
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -274,7 +267,18 @@ static void MX_FDCAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN FDCAN1_Init 2 */
-
+  HAL_StatusTypeDef status = HAL_ERROR;
+  /* Activate notifications */
+  status = HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, FDCAN_TX_BUFFER0);
+  if (status != HAL_OK) {
+      Error_Handler();
+  }
+  /* Start CAN module */
+  status = HAL_FDCAN_Start(&hfdcan1);
+  if (status != HAL_OK) {
+    Error_Handler();
+  }
+//HAL_START
   /* USER CODE END FDCAN1_Init 2 */
 
 }
@@ -419,24 +423,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/* USER CODE BEGIN Header_StartHeartbeatTask */
-/**
-* @brief Function implementing the heartbeatTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartHeartbeatTask */
-void StartHeartbeatTask(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END 5 */ 
-}
 
 /**
   * @brief  Period elapsed callback in non blocking mode
