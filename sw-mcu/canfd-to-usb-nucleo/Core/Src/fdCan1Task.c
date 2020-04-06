@@ -6,12 +6,17 @@
  */
 
 #include "fdCan1Task.h"
+#include "queues.h"
+#include "queue.h"
+
 #include "stm32g474xx.h"
 #include "stm32g4xx_hal.h"
 
 #define LED_Status1_Pin GPIO_PIN_7
 #define LED_Status1_GPIO_Port GPIOC
 
+extern QueueHandle_t queueToFDCAN1;
+extern QueueHandle_t queueToUSB;
 extern FDCAN_HandleTypeDef hfdcan1;
 extern void Error_Handler(void);
 
@@ -33,13 +38,17 @@ osThreadId_t * createFdCan1Task() {
 void StartFdCan1Task(void *argument)
 {
   HAL_StatusTypeDef status = HAL_ERROR;
-  uint8_t data[1] = { 45 };
+  uint8_t sendFromQueue = 0;
+  BaseType_t xStatus = pdFALSE;
+  Data_t data;
+  data.uCanModuleNo = 1;
+  data.payload[0] = 65;
 
   FDCAN_TxHeaderTypeDef TxHeader;
   TxHeader.Identifier = 0x529;
   TxHeader.IdType = FDCAN_EXTENDED_ID;
   TxHeader.TxFrameType = FDCAN_DATA_FRAME;
-  TxHeader.DataLength = FDCAN_DLC_BYTES_1;
+  TxHeader.DataLength = FDCAN_DLC_BYTES_12;
   TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
   TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
   TxHeader.FDFormat = FDCAN_FD_CAN;
@@ -48,36 +57,59 @@ void StartFdCan1Task(void *argument)
 
   for(;;)
   {
-    /* Send message every second */
-    status = HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, data);
-    if (status != HAL_OK) {
-      Error_Handler();
-    }
+    if (sendFromQueue) {
+      if (uxQueueMessagesWaiting(queueToFDCAN1)) {
+        if (data.payload[0]) {
+          data.payload[0] = 0;
+        }
+        else {
+          data.payload[0] = 1;
+        }
 
-    if (data[0] == 0) {
-      data[0] = 1;
-    } else {
-      data[0] = 0;
+        xStatus = xQueueReceive(queueToFDCAN1, &data, TICKS_TO_WAIT_FOR_RECEIVE);
+        if (xStatus == pdPASS) {
+        /*Message from queue has been received.*/
+          status = HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, (uint8_t*)&data);
+          if (status != HAL_OK) {
+            /*Can not send CAN frame.*/
+            Error_Handler();
+          }
+        }
+        else {
+          /*Can not receive message from queue.*/
+        }
+      }
     }
-
-    osDelay(1000);
+    else {
+      status = HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, (uint8_t*)&data);
+      if (status != HAL_OK) {
+        Error_Handler();
+      }
+      sendFromQueue = 1;
+    }
   }
 }
 
-static uint8_t receivedData[1] = { 0 };
-static HAL_StatusTypeDef receivedStatus = HAL_ERROR;
-static FDCAN_RxHeaderTypeDef RxHeader;
+
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs) {
+  static Data_t receivedData;
+  static HAL_StatusTypeDef receivedStatus = HAL_ERROR;
+  static BaseType_t xStatus = pdFALSE;
+  static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+  static FDCAN_RxHeaderTypeDef RxHeader;
 
-  receivedStatus = HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, receivedData);
-
+  receivedStatus = HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &RxHeader, (uint8_t*)&receivedData);
   if (receivedStatus != HAL_OK) {
     Error_Handler();
   }
-  if (receivedData[0] == 0) {
+
+  xStatus = xQueueSendToBackFromISR(queueToUSB, &receivedData, &xHigherPriorityTaskWoken);
+
+  if (receivedData.payload[0] == 0) {
     HAL_GPIO_WritePin(LED_Status1_GPIO_Port, LED_Status1_Pin, GPIO_PIN_RESET);
   }
-  else if (receivedData[0] == 1) {
+  else if (receivedData.payload[0] == 1) {
     HAL_GPIO_WritePin(LED_Status1_GPIO_Port, LED_Status1_Pin, GPIO_PIN_SET);
   }
+
 }

@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "heartbeatTask.h"
 #include "fdCan1Task.h"
+#include "usbTask.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -131,6 +132,7 @@ int main(void)
   /* creation of heartbeatTask */
   createHeartbeatTask();
   createFdCan1Task();
+  createUsbTask();
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
