@@ -17,6 +17,7 @@
 
 extern QueueHandle_t queueToFDCAN1;
 extern QueueHandle_t queueToUSB;
+extern QueueHandle_t queueToUART;
 extern FDCAN_HandleTypeDef hfdcan1;
 extern void Error_Handler(void);
 
@@ -41,8 +42,6 @@ void StartFdCan1Task(void *argument)
   uint8_t sendFromQueue = 0;
   BaseType_t xStatus = pdFALSE;
   Data_t data;
-  data.uCanModuleNo = 1;
-  data.payload[0] = 65;
 
   FDCAN_TxHeaderTypeDef TxHeader;
   TxHeader.Identifier = 0x529;
@@ -57,36 +56,20 @@ void StartFdCan1Task(void *argument)
 
   for(;;)
   {
-    if (sendFromQueue) {
-      if (uxQueueMessagesWaiting(queueToFDCAN1)) {
-        if (data.payload[0]) {
-          data.payload[0] = 0;
-        }
-        else {
-          data.payload[0] = 1;
-        }
-
-        xStatus = xQueueReceive(queueToFDCAN1, &data, TICKS_TO_WAIT_FOR_RECEIVE);
-        if (xStatus == pdPASS) {
+    if (uxQueueMessagesWaiting(queueToFDCAN1)) {
+      xStatus = xQueueReceive(queueToFDCAN1, &data, TICKS_TO_WAIT_FOR_RECEIVE);
+      if (xStatus == pdPASS) {
         /*Message from queue has been received.*/
-          status = HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, (uint8_t*)&data);
-          if (status != HAL_OK) {
-            /*Can not send CAN frame.*/
-            Error_Handler();
-          }
-        }
-        else {
-          /*Can not receive message from queue.*/
+        status = HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, (uint8_t*)&data);
+        if (status != HAL_OK) {
+          /*Can not send CAN frame.*/
+          Error_Handler();
         }
       }
-    }
-    else {
-      status = HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, (uint8_t*)&data);
-      if (status != HAL_OK) {
-        Error_Handler();
+      else {
+        /*Can not receive message from queue.*/
       }
-      sendFromQueue = 1;
-    }
+     }
   }
 }
 
@@ -103,13 +86,8 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     Error_Handler();
   }
 
-  xStatus = xQueueSendToBackFromISR(queueToUSB, &receivedData, &xHigherPriorityTaskWoken);
+  xStatus = xQueueSendToBackFromISR(queueToUART, &receivedData, &xHigherPriorityTaskWoken);
 
-  if (receivedData.payload[0] == 0) {
-    HAL_GPIO_WritePin(LED_Status1_GPIO_Port, LED_Status1_Pin, GPIO_PIN_RESET);
-  }
-  else if (receivedData.payload[0] == 1) {
-    HAL_GPIO_WritePin(LED_Status1_GPIO_Port, LED_Status1_Pin, GPIO_PIN_SET);
-  }
+  HAL_GPIO_TogglePin(LED_Status1_GPIO_Port, LED_Status1_Pin);
 
 }

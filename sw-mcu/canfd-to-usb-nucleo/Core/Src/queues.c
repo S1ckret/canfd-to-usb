@@ -14,8 +14,10 @@
 
 QueueHandle_t queueToUSB;
 QueueHandle_t queueToFDCAN1;
+QueueHandle_t queueToUART;
 
 void createQueues() {
   queueToUSB = xQueueCreate(FDCAN_COUNT * FDCAN_QUEUE_SIZE, sizeof(Data_t));
+  queueToUART = xQueueCreate(FDCAN_COUNT * FDCAN_QUEUE_SIZE, sizeof(Data_t));
   queueToFDCAN1 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(Data_t));
 }
