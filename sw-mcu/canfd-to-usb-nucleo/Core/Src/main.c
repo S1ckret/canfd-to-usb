@@ -26,8 +26,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "heartbeatTask.h"
-#include "fdCan1Task.h"
 #include "usbTask.h"
+
+#include "utlFDCAN.h"
+#include "utlFDCAN_Task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,33 +43,38 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define FDCAN_COUNT 3
+#define FDCAN_QUEUE_SIZE 3
+#define FDCAN_TASK_STACK_SIZE 192
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-FDCAN_HandleTypeDef hfdcan1;
-FDCAN_HandleTypeDef hfdcan2;
-FDCAN_HandleTypeDef hfdcan3;
 
 UART_HandleTypeDef hlpuart1;
 
 
 /* USER CODE BEGIN PV */
+utlFDCAN_CanModule_t utlFDCAN1;
+utlFDCAN_CanModule_t utlFDCAN2;
+utlFDCAN_CanModule_t utlFDCAN3;
 
+QueueHandle_t queueToUSB;
+QueueHandle_t queueToUART;
+
+QueueHandle_t queueToFDCAN1;
+QueueHandle_t queueToFDCAN2;
+QueueHandle_t queueToFDCAN3;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_FDCAN1_Init(void);
-static void MX_FDCAN2_Init(void);
-static void MX_FDCAN3_Init(void);
 static void MX_LPUART1_UART_Init(void);
 void StartHeartbeatTask(void *argument);
 
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
-
+static void Init_FDCAN(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -104,9 +111,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_FDCAN1_Init();
-  MX_FDCAN2_Init();
-  MX_FDCAN3_Init();
+  Init_FDCAN();
   MX_LPUART1_UART_Init();
   MX_USB_Device_Init();
 
@@ -135,12 +140,38 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  createQueues();
   createHeartbeatTask();
-  createFdCan1Task();
   createUartTask();
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  queueToUSB = xQueueCreate(FDCAN_COUNT * FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
+  queueToUART = xQueueCreate(FDCAN_COUNT * FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
+  queueToFDCAN1 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
+  queueToFDCAN2 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
+  queueToFDCAN3 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
+
+  utlFDCAN_FDCAN_Queue_Bundle FDCAN_Queue_Bundle;
+  FDCAN_Queue_Bundle.FDCAN = &utlFDCAN1;
+  FDCAN_Queue_Bundle.Queue = queueToFDCAN1;
+
+  osThreadAttr_t xFDCAN_attributes;
+  xFDCAN_attributes.name = "canfd1Task";
+  xFDCAN_attributes.priority = (osPriority_t) osPriorityNormal;
+  xFDCAN_attributes.stack_size = FDCAN_TASK_STACK_SIZE;
+
+  utlFDCAN_TaskCreate(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle, &xFDCAN_attributes);
+
+  FDCAN_Queue_Bundle.FDCAN = &utlFDCAN2;
+  FDCAN_Queue_Bundle.Queue = queueToFDCAN2;
+
+  xFDCAN_attributes.name = "canfd2Task";
+  utlFDCAN_TaskCreate(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle, &xFDCAN_attributes);
+
+  FDCAN_Queue_Bundle.FDCAN = &utlFDCAN3;
+  FDCAN_Queue_Bundle.Queue = queueToFDCAN3;
+
+  xFDCAN_attributes.name = "canfd3Task";
+  utlFDCAN_TaskCreate(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle, &xFDCAN_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
@@ -243,144 +274,6 @@ static void MX_NVIC_Init(void)
 }
 
 /**
-  * @brief FDCAN1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_FDCAN1_Init(void)
-{
-
-  /* USER CODE BEGIN FDCAN1_Init 0 */
-
-  /* USER CODE END FDCAN1_Init 0 */
-
-  /* USER CODE BEGIN FDCAN1_Init 1 */
-
-  /* USER CODE END FDCAN1_Init 1 */
-  hfdcan1.Instance = FDCAN1;
-  hfdcan1.Init.ClockDivider = FDCAN_CLOCK_DIV1;
-  hfdcan1.Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
-  hfdcan1.Init.Mode = FDCAN_MODE_INTERNAL_LOOPBACK;
-  hfdcan1.Init.AutoRetransmission = DISABLE;
-  hfdcan1.Init.TransmitPause = DISABLE;
-  hfdcan1.Init.ProtocolException = DISABLE;
-  hfdcan1.Init.NominalPrescaler = 1;
-  hfdcan1.Init.NominalSyncJumpWidth = 1;
-  hfdcan1.Init.NominalTimeSeg1 = 2;
-  hfdcan1.Init.NominalTimeSeg2 = 2;
-  hfdcan1.Init.DataPrescaler = 1;
-  hfdcan1.Init.DataSyncJumpWidth = 1;
-  hfdcan1.Init.DataTimeSeg1 = 1;
-  hfdcan1.Init.DataTimeSeg2 = 1;
-  hfdcan1.Init.StdFiltersNbr = 0;
-  hfdcan1.Init.ExtFiltersNbr = 0;
-  hfdcan1.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
-  if (HAL_FDCAN_Init(&hfdcan1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN FDCAN1_Init 2 */
-  HAL_StatusTypeDef status = HAL_ERROR;
-  /* Activate notifications */
-  status = HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, FDCAN_TX_BUFFER0);
-  if (status != HAL_OK) {
-      Error_Handler();
-  }
-  /* Start CAN module */
-  status = HAL_FDCAN_Start(&hfdcan1);
-  if (status != HAL_OK) {
-    Error_Handler();
-  }
-//HAL_START
-  /* USER CODE END FDCAN1_Init 2 */
-
-}
-
-/**
-  * @brief FDCAN2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_FDCAN2_Init(void)
-{
-
-  /* USER CODE BEGIN FDCAN2_Init 0 */
-
-  /* USER CODE END FDCAN2_Init 0 */
-
-  /* USER CODE BEGIN FDCAN2_Init 1 */
-
-  /* USER CODE END FDCAN2_Init 1 */
-  hfdcan2.Instance = FDCAN2;
-  hfdcan2.Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
-  hfdcan2.Init.Mode = FDCAN_MODE_NORMAL;
-  hfdcan2.Init.AutoRetransmission = DISABLE;
-  hfdcan2.Init.TransmitPause = DISABLE;
-  hfdcan2.Init.ProtocolException = DISABLE;
-  hfdcan2.Init.NominalPrescaler = 1;
-  hfdcan2.Init.NominalSyncJumpWidth = 1;
-  hfdcan2.Init.NominalTimeSeg1 = 2;
-  hfdcan2.Init.NominalTimeSeg2 = 2;
-  hfdcan2.Init.DataPrescaler = 1;
-  hfdcan2.Init.DataSyncJumpWidth = 1;
-  hfdcan2.Init.DataTimeSeg1 = 1;
-  hfdcan2.Init.DataTimeSeg2 = 1;
-  hfdcan2.Init.StdFiltersNbr = 0;
-  hfdcan2.Init.ExtFiltersNbr = 0;
-  hfdcan2.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
-  if (HAL_FDCAN_Init(&hfdcan2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN FDCAN2_Init 2 */
-
-  /* USER CODE END FDCAN2_Init 2 */
-
-}
-
-/**
-  * @brief FDCAN3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_FDCAN3_Init(void)
-{
-
-  /* USER CODE BEGIN FDCAN3_Init 0 */
-
-  /* USER CODE END FDCAN3_Init 0 */
-
-  /* USER CODE BEGIN FDCAN3_Init 1 */
-
-  /* USER CODE END FDCAN3_Init 1 */
-  hfdcan3.Instance = FDCAN3;
-  hfdcan3.Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
-  hfdcan3.Init.Mode = FDCAN_MODE_NORMAL;
-  hfdcan3.Init.AutoRetransmission = DISABLE;
-  hfdcan3.Init.TransmitPause = DISABLE;
-  hfdcan3.Init.ProtocolException = DISABLE;
-  hfdcan3.Init.NominalPrescaler = 1;
-  hfdcan3.Init.NominalSyncJumpWidth = 1;
-  hfdcan3.Init.NominalTimeSeg1 = 2;
-  hfdcan3.Init.NominalTimeSeg2 = 2;
-  hfdcan3.Init.DataPrescaler = 1;
-  hfdcan3.Init.DataSyncJumpWidth = 1;
-  hfdcan3.Init.DataTimeSeg1 = 1;
-  hfdcan3.Init.DataTimeSeg2 = 1;
-  hfdcan3.Init.StdFiltersNbr = 0;
-  hfdcan3.Init.ExtFiltersNbr = 0;
-  hfdcan3.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
-  if (HAL_FDCAN_Init(&hfdcan3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN FDCAN3_Init 2 */
-
-  /* USER CODE END FDCAN3_Init 2 */
-
-}
-
-/**
   * @brief LPUART1 Initialization Function
   * @param None
   * @retval None
@@ -480,7 +373,38 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void Init_FDCAN(void) {
+  FDCAN_InitTypeDef Init;
+  Init.ClockDivider = FDCAN_CLOCK_DIV1;
+  Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
+  Init.Mode = FDCAN_MODE_INTERNAL_LOOPBACK;
+  Init.AutoRetransmission = DISABLE;
+  Init.TransmitPause = DISABLE;
+  Init.ProtocolException = DISABLE;
+  Init.NominalPrescaler = 1;
+  Init.NominalSyncJumpWidth = 1;
+  Init.NominalTimeSeg1 = 2;
+  Init.NominalTimeSeg2 = 2;
+  Init.DataPrescaler = 1;
+  Init.DataSyncJumpWidth = 1;
+  Init.DataTimeSeg1 = 1;
+  Init.DataTimeSeg2 = 1;
+  Init.StdFiltersNbr = 0;
+  Init.ExtFiltersNbr = 0;
+  Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
 
+  utlFDCAN_Init(&utlFDCAN1, FDCAN1, &Init);
+  utlFDCAN_Init(&utlFDCAN2, FDCAN2, &Init);
+  utlFDCAN_Init(&utlFDCAN3, FDCAN3, &Init);
+
+  utlFDCAN_ActivateNotification(&utlFDCAN1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, FDCAN_TX_BUFFER0);
+  utlFDCAN_ActivateNotification(&utlFDCAN2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, FDCAN_TX_BUFFER0);
+  utlFDCAN_ActivateNotification(&utlFDCAN3, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, FDCAN_TX_BUFFER0);
+
+  utlFDCAN_Start(&utlFDCAN1);
+  utlFDCAN_Start(&utlFDCAN2);
+  utlFDCAN_Start(&utlFDCAN3);
+}
 /* USER CODE END 4 */
 
 
