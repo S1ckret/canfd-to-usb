@@ -24,6 +24,7 @@
 
 /* USER CODE BEGIN INCLUDE */
 #include "utlFDCAN.h"
+#include "utlFDCAN_config.h"
 #include "FreeRTOS.h"
 #include "queue.h"
 /* USER CODE END INCLUDE */
@@ -92,6 +93,7 @@ extern QueueHandle_t xQueueToFDCAN1;
 extern QueueHandle_t xQueueToFDCAN2;
 extern QueueHandle_t xQueueToFDCAN3;
 
+extern void Error_Handler(void);
 /* USER CODE END EXPORTED_VARIABLES */
 
 /**
@@ -247,8 +249,20 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, (uint8_t*)&Data);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
 
-  /* TODO: Choose to which CAN module send data*/
-  xLastStatus_Os = xQueueSendToBackFromISR(xQueueToFDCAN1, &Data, &xHigherPriorityTaskWoken);
+  switch (Data.FDCAN_ID) {
+    case FDCAN_MODULE_1_NUMBER:
+      xLastStatus_Os = xQueueSendToBackFromISR(xQueueToFDCAN1, Data.Payload, &xHigherPriorityTaskWoken);
+      break;
+    case FDCAN_MODULE_2_NUMBER:
+      xLastStatus_Os = xQueueSendToBackFromISR(xQueueToFDCAN2, Data.Payload, &xHigherPriorityTaskWoken);
+      break;
+    case FDCAN_MODULE_3_NUMBER:
+      xLastStatus_Os = xQueueSendToBackFromISR(xQueueToFDCAN3, Data.Payload, &xHigherPriorityTaskWoken);
+      break;
+    default:
+      /* Do not send to FDCAN modules*/
+      break;
+  }
   if (xLastStatus_Os != pdPASS) {
     Error_Handler();
   }

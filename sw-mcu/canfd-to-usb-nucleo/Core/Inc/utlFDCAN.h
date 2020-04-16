@@ -14,7 +14,8 @@
 #define TICKS_TO_WAIT_FOR_RECEIVE pdMS_TO_TICKS(100)
 
 typedef struct {
-  uint8_t payload[8];
+  uint8_t FDCAN_ID;
+  uint8_t Payload[8];
 } utlFDCAN_Data_t;
 
 typedef struct {

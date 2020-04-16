@@ -12,11 +12,14 @@
 #include "stm32g4xx_hal_uart.h"
 
 #include "utlFDCAN.h"
+#include "utlFDCAN_config.h"
 
 #include "FreeRTOS.h"
 #include "queue.h"
 
 extern QueueHandle_t xQueueToFDCAN1;
+extern QueueHandle_t xQueueToFDCAN2;
+extern QueueHandle_t xQueueToFDCAN3;
 extern QueueHandle_t xQueueToUART;
 extern UART_HandleTypeDef hlpuart1;
 extern void Error_Handler(void);
@@ -69,7 +72,21 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   static BaseType_t xStatus = pdFALSE;
   static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
   HAL_UART_Transmit_IT(&hlpuart1, answer, sizeof(utlFDCAN_Data_t));
-  xStatus = xQueueSendToBackFromISR(xQueueToFDCAN1, &receivedData, &xHigherPriorityTaskWoken);
+
+  switch (receivedData.FDCAN_ID) {
+    case FDCAN_MODULE_1_NUMBER:
+      xStatus = xQueueSendToBackFromISR(xQueueToFDCAN1, (uint8_t*)&receivedData, &xHigherPriorityTaskWoken);
+      break;
+    case FDCAN_MODULE_2_NUMBER:
+      xStatus = xQueueSendToBackFromISR(xQueueToFDCAN2, (uint8_t*)&receivedData, &xHigherPriorityTaskWoken);
+      break;
+    case FDCAN_MODULE_3_NUMBER:
+      xStatus = xQueueSendToBackFromISR(xQueueToFDCAN3, (uint8_t*)&receivedData, &xHigherPriorityTaskWoken);
+      break;
+    default:
+      /* Do not send to FDCAN modules*/
+      break;
+  }
 
   HAL_UART_Receive_IT(&hlpuart1, (uint8_t*)&receivedData, sizeof(utlFDCAN_Data_t));
 }
