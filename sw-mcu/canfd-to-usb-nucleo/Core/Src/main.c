@@ -59,12 +59,12 @@ utlFDCAN_CanModule_t utlFDCAN1;
 utlFDCAN_CanModule_t utlFDCAN2;
 utlFDCAN_CanModule_t utlFDCAN3;
 
-QueueHandle_t queueToUSB;
-QueueHandle_t queueToUART;
+QueueHandle_t xQueueToUSB;
+QueueHandle_t xQueueToUART;
 
-QueueHandle_t queueToFDCAN1;
-QueueHandle_t queueToFDCAN2;
-QueueHandle_t queueToFDCAN3;
+QueueHandle_t xQueueToFDCAN1;
+QueueHandle_t xQueueToFDCAN2;
+QueueHandle_t xQueueToFDCAN3;
 
 utlFDCAN_FDCAN_Queue_Bundle FDCAN_Queue_Bundle1;
 utlFDCAN_FDCAN_Queue_Bundle FDCAN_Queue_Bundle2;
@@ -148,17 +148,17 @@ int main(void)
   /* Create the thread(s) */
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  queueToUSB = xQueueCreate(FDCAN_COUNT * FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
-  queueToUART = xQueueCreate(FDCAN_COUNT * FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
-  queueToFDCAN1 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
-  queueToFDCAN2 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
-  queueToFDCAN3 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
+  xQueueToUSB = xQueueCreate(FDCAN_COUNT * FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
+  xQueueToUART = xQueueCreate(FDCAN_COUNT * FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
+  xQueueToFDCAN1 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
+  xQueueToFDCAN2 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
+  xQueueToFDCAN3 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
 
   createHeartbeatTask();
   createUartTask();
 
   FDCAN_Queue_Bundle1.FDCAN = &utlFDCAN1;
-  FDCAN_Queue_Bundle1.Queue = queueToFDCAN1;
+  FDCAN_Queue_Bundle1.Queue = xQueueToFDCAN1;
 
   osThreadAttr_t xFDCAN_attributes = {
     .name = "canfd1Task",
@@ -168,13 +168,13 @@ int main(void)
   utlFDCAN_Task_Create(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle1, &xFDCAN_attributes);
 
   FDCAN_Queue_Bundle2.FDCAN = &utlFDCAN2;
-  FDCAN_Queue_Bundle2.Queue = queueToFDCAN2;
+  FDCAN_Queue_Bundle2.Queue = xQueueToFDCAN2;
 
   xFDCAN_attributes.name = "canfd2Task";
   utlFDCAN_Task_Create(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle2, &xFDCAN_attributes);
 
   FDCAN_Queue_Bundle3.FDCAN = &utlFDCAN3;
-  FDCAN_Queue_Bundle3.Queue = queueToFDCAN3;
+  FDCAN_Queue_Bundle3.Queue = xQueueToFDCAN3;
 
   xFDCAN_attributes.name = "canfd3Task";
   utlFDCAN_Task_Create(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle3, &xFDCAN_attributes);

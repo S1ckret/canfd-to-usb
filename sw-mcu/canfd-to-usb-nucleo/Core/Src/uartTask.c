@@ -16,8 +16,8 @@
 #include "FreeRTOS.h"
 #include "queue.h"
 
-extern QueueHandle_t queueToFDCAN1;
-extern QueueHandle_t queueToUART;
+extern QueueHandle_t xQueueToFDCAN1;
+extern QueueHandle_t xQueueToUART;
 extern UART_HandleTypeDef hlpuart1;
 extern void Error_Handler(void);
 
@@ -46,8 +46,8 @@ void StartUartTask(void *argument)
   HAL_UART_Receive_IT(&hlpuart1, (uint8_t*)&receivedData, sizeof(utlFDCAN_Data_t));
   for(;;)
   {
-    if (uxQueueMessagesWaiting(queueToUART)) {
-      xStatus = xQueueReceive(queueToUART, &data, TICKS_TO_WAIT_FOR_RECEIVE);
+    if (uxQueueMessagesWaiting(xQueueToUART)) {
+      xStatus = xQueueReceive(xQueueToUART, &data, TICKS_TO_WAIT_FOR_RECEIVE);
       if (xStatus == pdPASS) {
         /*Message from queue has been received.*/
         uartStatus = HAL_UART_Transmit_IT(&hlpuart1, (uint8_t*)&data, sizeof(utlFDCAN_Data_t));
@@ -69,7 +69,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   static BaseType_t xStatus = pdFALSE;
   static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
   HAL_UART_Transmit_IT(&hlpuart1, answer, sizeof(utlFDCAN_Data_t));
-  xStatus = xQueueSendToBackFromISR(queueToFDCAN1, &receivedData, &xHigherPriorityTaskWoken);
+  xStatus = xQueueSendToBackFromISR(xQueueToFDCAN1, &receivedData, &xHigherPriorityTaskWoken);
 
   HAL_UART_Receive_IT(&hlpuart1, (uint8_t*)&receivedData, sizeof(utlFDCAN_Data_t));
 }
