@@ -17,8 +17,10 @@
 #include "stm32g474xx.h"
 #include "stm32g4xx_hal.h"
 
+#include "utlFDCAN.h"
+
 #include "usbd_cdc_if.h"
-#include "queues.h"
+#include "FreeRTOS.h"
 #include "queue.h"
 
 extern QueueHandle_t queueToUSB;
@@ -43,14 +45,14 @@ void StartUsbTask(void *argument)
 {
   uint8_t usbStatus = HAL_ERROR;
   BaseType_t xStatus = pdFALSE;
-  Data_t data;
+  utlFDCAN_Data_t data;
   for(;;)
   {
     if (uxQueueMessagesWaiting(queueToUSB)) {
       xStatus = xQueueReceive(queueToUSB, &data, TICKS_TO_WAIT_FOR_RECEIVE);
       if (xStatus == pdPASS) {
         /*Message from queue has been received.*/
-        usbStatus = CDC_Transmit_FS((uint8_t*)&data, sizeof(Data_t) >> 2);
+        usbStatus = CDC_Transmit_FS((uint8_t*)&data, sizeof(utlFDCAN_Data_t) >> 2);
         if (usbStatus != USBD_OK) {
           /*Can not send USB packet.*/
           Error_Handler();

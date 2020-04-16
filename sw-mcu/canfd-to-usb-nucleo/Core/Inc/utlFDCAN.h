@@ -11,6 +11,8 @@
 #include "stm32g4xx_hal_fdcan.h"
 #include "portmacro.h"
 
+#define TICKS_TO_WAIT_FOR_RECEIVE pdMS_TO_TICKS(100)
+
 typedef struct {
   uint8_t payload[8];
 } utlFDCAN_Data_t;

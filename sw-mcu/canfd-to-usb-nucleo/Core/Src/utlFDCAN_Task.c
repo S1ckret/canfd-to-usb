@@ -6,8 +6,6 @@
  */
 #include "utlFDCAN_Task.h"
 
-#define TICKS_TO_WAIT_FOR_RECEIVE pdMS_TO_TICKS(100)
-
 osThreadId_t utlFDCAN_TaskCreate(osThreadFunc_t function, void * argument, osThreadAttr_t * attr) {
   return osThreadNew(function, argument, attr);
 }
