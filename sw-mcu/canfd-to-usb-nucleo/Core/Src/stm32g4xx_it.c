@@ -25,6 +25,7 @@
 #include "task.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "utlFDCAN.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,14 +60,13 @@
 
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
-extern FDCAN_HandleTypeDef hfdcan1;
-extern FDCAN_HandleTypeDef hfdcan2;
-extern FDCAN_HandleTypeDef hfdcan3;
 extern UART_HandleTypeDef hlpuart1;
 extern TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN EV */
-
+extern utlFDCAN_CanModule_t utlFDCAN1;
+extern utlFDCAN_CanModule_t utlFDCAN2;
+extern utlFDCAN_CanModule_t utlFDCAN3;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -187,7 +187,7 @@ void FDCAN1_IT0_IRQHandler(void)
   /* USER CODE BEGIN FDCAN1_IT0_IRQn 0 */
 
   /* USER CODE END FDCAN1_IT0_IRQn 0 */
-  HAL_FDCAN_IRQHandler(&hfdcan1);
+  HAL_FDCAN_IRQHandler(&utlFDCAN1.FDCAN_Handle);
   /* USER CODE BEGIN FDCAN1_IT0_IRQn 1 */
 
   /* USER CODE END FDCAN1_IT0_IRQn 1 */
@@ -201,7 +201,7 @@ void FDCAN1_IT1_IRQHandler(void)
   /* USER CODE BEGIN FDCAN1_IT1_IRQn 0 */
 
   /* USER CODE END FDCAN1_IT1_IRQn 0 */
-  HAL_FDCAN_IRQHandler(&hfdcan1);
+  HAL_FDCAN_IRQHandler(&utlFDCAN1.FDCAN_Handle);
   /* USER CODE BEGIN FDCAN1_IT1_IRQn 1 */
 
   /* USER CODE END FDCAN1_IT1_IRQn 1 */
@@ -229,7 +229,7 @@ void FDCAN2_IT0_IRQHandler(void)
   /* USER CODE BEGIN FDCAN2_IT0_IRQn 0 */
 
   /* USER CODE END FDCAN2_IT0_IRQn 0 */
-  HAL_FDCAN_IRQHandler(&hfdcan2);
+  HAL_FDCAN_IRQHandler(&utlFDCAN2.FDCAN_Handle);
   /* USER CODE BEGIN FDCAN2_IT0_IRQn 1 */
 
   /* USER CODE END FDCAN2_IT0_IRQn 1 */
@@ -243,7 +243,7 @@ void FDCAN2_IT1_IRQHandler(void)
   /* USER CODE BEGIN FDCAN2_IT1_IRQn 0 */
 
   /* USER CODE END FDCAN2_IT1_IRQn 0 */
-  HAL_FDCAN_IRQHandler(&hfdcan2);
+  HAL_FDCAN_IRQHandler(&utlFDCAN2.FDCAN_Handle);
   /* USER CODE BEGIN FDCAN2_IT1_IRQn 1 */
 
   /* USER CODE END FDCAN2_IT1_IRQn 1 */
@@ -257,7 +257,7 @@ void FDCAN3_IT0_IRQHandler(void)
   /* USER CODE BEGIN FDCAN3_IT0_IRQn 0 */
 
   /* USER CODE END FDCAN3_IT0_IRQn 0 */
-  HAL_FDCAN_IRQHandler(&hfdcan3);
+  HAL_FDCAN_IRQHandler(&utlFDCAN3.FDCAN_Handle);
   /* USER CODE BEGIN FDCAN3_IT0_IRQn 1 */
 
   /* USER CODE END FDCAN3_IT0_IRQn 1 */
@@ -271,7 +271,7 @@ void FDCAN3_IT1_IRQHandler(void)
   /* USER CODE BEGIN FDCAN3_IT1_IRQn 0 */
 
   /* USER CODE END FDCAN3_IT1_IRQn 0 */
-  HAL_FDCAN_IRQHandler(&hfdcan3);
+  HAL_FDCAN_IRQHandler(&utlFDCAN3.FDCAN_Handle);
   /* USER CODE BEGIN FDCAN3_IT1_IRQn 1 */
 
   /* USER CODE END FDCAN3_IT1_IRQn 1 */

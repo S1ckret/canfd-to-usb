@@ -26,6 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "heartbeatTask.h"
+#include "uartTask.h"
 #include "usbTask.h"
 
 #include "utlFDCAN.h"
@@ -64,6 +65,11 @@ QueueHandle_t queueToUART;
 QueueHandle_t queueToFDCAN1;
 QueueHandle_t queueToFDCAN2;
 QueueHandle_t queueToFDCAN3;
+
+utlFDCAN_FDCAN_Queue_Bundle FDCAN_Queue_Bundle1;
+utlFDCAN_FDCAN_Queue_Bundle FDCAN_Queue_Bundle2;
+utlFDCAN_FDCAN_Queue_Bundle FDCAN_Queue_Bundle3;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -111,9 +117,9 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  Init_FDCAN();
   MX_LPUART1_UART_Init();
-  MX_USB_Device_Init();
+//  MX_USB_Device_Init();
+  Init_FDCAN();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -150,28 +156,27 @@ int main(void)
   queueToFDCAN2 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
   queueToFDCAN3 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
 
-  utlFDCAN_FDCAN_Queue_Bundle FDCAN_Queue_Bundle;
-  FDCAN_Queue_Bundle.FDCAN = &utlFDCAN1;
-  FDCAN_Queue_Bundle.Queue = queueToFDCAN1;
+  FDCAN_Queue_Bundle1.FDCAN = &utlFDCAN1;
+  FDCAN_Queue_Bundle1.Queue = queueToFDCAN1;
 
   osThreadAttr_t xFDCAN_attributes;
   xFDCAN_attributes.name = "canfd1Task";
   xFDCAN_attributes.priority = (osPriority_t) osPriorityNormal;
   xFDCAN_attributes.stack_size = FDCAN_TASK_STACK_SIZE;
 
-  utlFDCAN_TaskCreate(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle, &xFDCAN_attributes);
+  utlFDCAN_Task_Create(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle1, &xFDCAN_attributes);
 
-  FDCAN_Queue_Bundle.FDCAN = &utlFDCAN2;
-  FDCAN_Queue_Bundle.Queue = queueToFDCAN2;
+  FDCAN_Queue_Bundle2.FDCAN = &utlFDCAN2;
+  FDCAN_Queue_Bundle2.Queue = queueToFDCAN2;
 
   xFDCAN_attributes.name = "canfd2Task";
-  utlFDCAN_TaskCreate(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle, &xFDCAN_attributes);
+  utlFDCAN_Task_Create(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle2, &xFDCAN_attributes);
 
-  FDCAN_Queue_Bundle.FDCAN = &utlFDCAN3;
-  FDCAN_Queue_Bundle.Queue = queueToFDCAN3;
+  FDCAN_Queue_Bundle3.FDCAN = &utlFDCAN3;
+  FDCAN_Queue_Bundle3.Queue = queueToFDCAN3;
 
   xFDCAN_attributes.name = "canfd3Task";
-  utlFDCAN_TaskCreate(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle, &xFDCAN_attributes);
+  utlFDCAN_Task_Create(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle3, &xFDCAN_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
@@ -404,6 +409,27 @@ static void Init_FDCAN(void) {
   utlFDCAN_Start(&utlFDCAN1);
   utlFDCAN_Start(&utlFDCAN2);
   utlFDCAN_Start(&utlFDCAN3);
+
+  FDCAN_TxHeaderTypeDef TxHeader;
+  TxHeader.Identifier = 0x529;
+  TxHeader.IdType = FDCAN_EXTENDED_ID;
+  TxHeader.TxFrameType = FDCAN_DATA_FRAME;
+  TxHeader.DataLength = FDCAN_DLC_BYTES_12;
+  TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+  TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
+  TxHeader.FDFormat = FDCAN_FD_CAN;
+  TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+  TxHeader.MessageMarker = 0;
+
+  utlFDCAN1.FDCAN_TxHeader = TxHeader;
+
+  TxHeader.Identifier = 0x52A;
+
+  utlFDCAN2.FDCAN_TxHeader = TxHeader;
+
+  TxHeader.Identifier = 0x52B;
+
+  utlFDCAN3.FDCAN_TxHeader = TxHeader;
 }
 /* USER CODE END 4 */
 

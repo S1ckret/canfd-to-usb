@@ -6,7 +6,7 @@
  */
 #include "utlFDCAN_Task.h"
 
-osThreadId_t utlFDCAN_TaskCreate(osThreadFunc_t function, void * argument, osThreadAttr_t * attr) {
+osThreadId_t utlFDCAN_Task_Create(osThreadFunc_t function, void * argument, osThreadAttr_t * attr) {
   return osThreadNew(function, argument, attr);
 }
 
@@ -24,11 +24,11 @@ void utlFDCAN_Task_Start(void * argument) {
         /* Message from queue has been received. */
         /* Send message to the device. */
         pxFDCAN->LastStatus_HAL = HAL_FDCAN_AddMessageToTxFifoQ(&pxFDCAN->FDCAN_Handle, &pxFDCAN->FDCAN_TxHeader, (uint8_t*)&pxFDCAN->Data);
-        utlFDCAN_Check_For_Error(pxFDCAN);
+        utlFDCAN_Check_For_Error_HAL(pxFDCAN);
       }
       else {
         /* Can not receive message from queue.*/
-        void utlFDCAN_Error_Handler();
+        utlFDCAN_Error_Handler();
       }
      }
   }

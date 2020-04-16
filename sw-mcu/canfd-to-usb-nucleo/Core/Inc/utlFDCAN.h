@@ -8,8 +8,8 @@
 #ifndef INC_UTLFDCAN_H_
 #define INC_UTLFDCAN_H_
 
-#include "stm32g4xx_hal_fdcan.h"
-#include "portmacro.h"
+#include "FreeRTOS.h"
+#include "stm32g4xx_hal.h"
 
 #define TICKS_TO_WAIT_FOR_RECEIVE pdMS_TO_TICKS(100)
 
@@ -31,7 +31,9 @@ void utlFDCAN_ActivateNotification(utlFDCAN_CanModule_t * FDCAN_Module, uint32_t
 
 void utlFDCAN_Start(utlFDCAN_CanModule_t * FDCAN_Module);
 
-void utlFDCAN_Check_For_Error(utlFDCAN_CanModule_t * FDCAN_Module);
+void utlFDCAN_Check_For_Error_HAL(utlFDCAN_CanModule_t * FDCAN_Module);
+
+void utlFDCAN_Check_For_Error_Os(utlFDCAN_CanModule_t * FDCAN_Module);
 
 void utlFDCAN_Error_Handler(void);
 

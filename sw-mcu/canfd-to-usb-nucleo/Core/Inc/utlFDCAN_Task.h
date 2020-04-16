@@ -18,7 +18,7 @@ typedef struct {
   QueueHandle_t Queue;
 } utlFDCAN_FDCAN_Queue_Bundle;
 
-osThreadId_t utlFDCAN_Task_Create(osThreadAttr_t * attr, osThreadFunc_t function, void * argument);
+osThreadId_t utlFDCAN_Task_Create(osThreadFunc_t function, void * argument, osThreadAttr_t * attr);
 
 void utlFDCAN_Task_Start(void * argument);
 
