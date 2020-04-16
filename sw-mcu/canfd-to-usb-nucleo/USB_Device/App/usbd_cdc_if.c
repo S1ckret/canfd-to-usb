@@ -23,6 +23,9 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
+#include "utlFDCAN.h"
+#include "FreeRTOS.h"
+#include "queue.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,22 +59,6 @@
   * @}
   */
 
-/** @defgroup USBD_CDC_IF_Private_Defines USBD_CDC_IF_Private_Defines
-  * @brief Private defines.
-  * @{
-  */
-
-/* USER CODE BEGIN PRIVATE_DEFINES */
-/* Define size for the receive and transmit buffer over CDC */
-/* It's up to user to redefine and/or remove those define */
-#define APP_RX_DATA_SIZE  2048
-#define APP_TX_DATA_SIZE  2048
-/* USER CODE END PRIVATE_DEFINES */
-
-/**
-  * @}
-  */
-
 /** @defgroup USBD_CDC_IF_Private_Macros USBD_CDC_IF_Private_Macros
   * @brief Private macros.
   * @{
@@ -80,22 +67,6 @@
 /* USER CODE BEGIN PRIVATE_MACRO */
 
 /* USER CODE END PRIVATE_MACRO */
-
-/**
-  * @}
-  */
-
-/** @defgroup USBD_CDC_IF_Private_Variables USBD_CDC_IF_Private_Variables
-  * @brief Private variables.
-  * @{
-  */
-/* Create buffer for reception and transmission           */
-/* It's up to user to redefine and/or remove those define */
-/** Received data over USB are stored in this buffer      */
-uint8_t UserRxBufferFS[APP_RX_DATA_SIZE];
-
-/** Data to send over USB CDC are stored in this buffer   */
-uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
 
@@ -113,6 +84,13 @@ uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
+extern utlFDCAN_CanModule_t utlFDCAN1;
+extern utlFDCAN_CanModule_t utlFDCAN2;
+extern utlFDCAN_CanModule_t utlFDCAN3;
+
+extern QueueHandle_t xQueueToFDCAN1;
+extern QueueHandle_t xQueueToFDCAN2;
+extern QueueHandle_t xQueueToFDCAN3;
 
 /* USER CODE END EXPORTED_VARIABLES */
 
@@ -155,8 +133,6 @@ static int8_t CDC_Init_FS(void)
 {
   /* USER CODE BEGIN 3 */
   /* Set Application Buffers */
-  USBD_CDC_SetTxBuffer(&hUsbDeviceFS, UserTxBufferFS, 0);
-  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, UserRxBufferFS);
   return (USBD_OK);
   /* USER CODE END 3 */
 }
@@ -264,8 +240,18 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &UserRxBufferFS[0]);
+  static utlFDCAN_Data_t Data;
+  static BaseType_t xLastStatus_Os = pdFALSE;
+  static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, (uint8_t*)&Data);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+
+  /* TODO: Choose to which CAN module send data*/
+  xLastStatus_Os = xQueueSendToBackFromISR(xQueueToFDCAN1, &Data, &xHigherPriorityTaskWoken);
+  if (xLastStatus_Os != pdPASS) {
+    Error_Handler();
+  }
 
   return (USBD_OK);
   /* USER CODE END 6 */

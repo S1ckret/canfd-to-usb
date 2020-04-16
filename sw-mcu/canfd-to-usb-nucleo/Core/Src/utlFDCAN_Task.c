@@ -35,7 +35,6 @@ void utlFDCAN_Task_Start(void * argument) {
       }
       else {
         /* Can not receive message from queue.*/
-        utlFDCAN_Error_Handler();
       }
      }
   }
