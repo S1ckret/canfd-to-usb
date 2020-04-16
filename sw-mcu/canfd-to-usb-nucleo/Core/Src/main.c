@@ -146,8 +146,6 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  createHeartbeatTask();
-  createUartTask();
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   queueToUSB = xQueueCreate(FDCAN_COUNT * FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
@@ -156,14 +154,17 @@ int main(void)
   queueToFDCAN2 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
   queueToFDCAN3 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
 
+  createHeartbeatTask();
+  createUartTask();
+
   FDCAN_Queue_Bundle1.FDCAN = &utlFDCAN1;
   FDCAN_Queue_Bundle1.Queue = queueToFDCAN1;
 
-  osThreadAttr_t xFDCAN_attributes;
-  xFDCAN_attributes.name = "canfd1Task";
-  xFDCAN_attributes.priority = (osPriority_t) osPriorityNormal;
-  xFDCAN_attributes.stack_size = FDCAN_TASK_STACK_SIZE;
-
+  osThreadAttr_t xFDCAN_attributes = {
+    .name = "canfd1Task",
+    .priority = (osPriority_t) osPriorityNormal,
+    .stack_size = FDCAN_TASK_STACK_SIZE
+  };
   utlFDCAN_Task_Create(utlFDCAN_Task_Start, &FDCAN_Queue_Bundle1, &xFDCAN_attributes);
 
   FDCAN_Queue_Bundle2.FDCAN = &utlFDCAN2;
