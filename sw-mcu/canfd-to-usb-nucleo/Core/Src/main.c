@@ -53,7 +53,6 @@
 
 UART_HandleTypeDef hlpuart1;
 
-
 /* USER CODE BEGIN PV */
 utlFDCAN_CanModule_t utlFDCAN1;
 utlFDCAN_CanModule_t utlFDCAN2;
@@ -76,7 +75,6 @@ utlFDCAN_FDCAN_Queue_Bundle FDCAN_Queue_Bundle3;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_LPUART1_UART_Init(void);
-void StartHeartbeatTask(void *argument);
 
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
@@ -117,9 +115,9 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  Init_FDCAN();
   MX_LPUART1_UART_Init();
   MX_USB_Device_Init();
-  Init_FDCAN();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -146,6 +144,7 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
+  /* creation of heartbeatTask */
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   xQueueToUSB = xQueueCreate(FDCAN_COUNT * FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
@@ -265,18 +264,15 @@ static void MX_NVIC_Init(void)
   /* FDCAN2_IT0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(FDCAN2_IT0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(FDCAN2_IT0_IRQn);
-  /* FDCAN2_IT1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(FDCAN2_IT1_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(FDCAN2_IT1_IRQn);
+  /* FDCAN3_IT1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(FDCAN3_IT1_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(FDCAN3_IT1_IRQn);
   /* FDCAN3_IT0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(FDCAN3_IT0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(FDCAN3_IT0_IRQn);
   /* FDCAN3_IT1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(FDCAN3_IT1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(FDCAN3_IT1_IRQn);
-  /* FDCAN3_IT1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(LPUART1_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(LPUART1_IRQn);
 }
 
 /**
@@ -339,42 +335,52 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, STANDBY_2_Pin|STANDBY_1_Pin|LED_HEARTBEAT_Pin|STANDBY_3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_STATUS1_GPIO_Port, LED_STATUS1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LED4_Pin|STANDBY_2_Pin|STANDBY_3_Pin|LED_HEARTBEAT_Pin 
+                          |STANDBY_1_Pin|LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, LED_STATUS2_Pin|LED_STATUS3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : STANDBY_2_Pin STANDBY_1_Pin LED_HEARTBEAT_Pin STANDBY_3_Pin */
-  GPIO_InitStruct.Pin = STANDBY_2_Pin|STANDBY_1_Pin|LED_HEARTBEAT_Pin|STANDBY_3_Pin;
+  /*Configure GPIO pins : SW2_Pin SW1_Pin */
+  GPIO_InitStruct.Pin = SW2_Pin|SW1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LED3_Pin */
+  GPIO_InitStruct.Pin = LED3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED3_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LED4_Pin STANDBY_2_Pin STANDBY_3_Pin LED_HEARTBEAT_Pin 
+                           STANDBY_1_Pin LED2_Pin */
+  GPIO_InitStruct.Pin = LED4_Pin|STANDBY_2_Pin|STANDBY_3_Pin|LED_HEARTBEAT_Pin 
+                          |STANDBY_1_Pin|LED2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SW3_Pin SW2_Pin SW1_Pin */
-  GPIO_InitStruct.Pin = SW3_Pin|SW2_Pin|SW1_Pin;
+  /*Configure GPIO pin : LED1_Pin */
+  GPIO_InitStruct.Pin = LED1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SW3_Pin */
+  GPIO_InitStruct.Pin = SW3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : LED_STATUS1_Pin */
-  GPIO_InitStruct.Pin = LED_STATUS1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_STATUS1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : LED_STATUS2_Pin LED_STATUS3_Pin */
-  GPIO_InitStruct.Pin = LED_STATUS2_Pin|LED_STATUS3_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(SW3_GPIO_Port, &GPIO_InitStruct);
 
 }
 
@@ -434,7 +440,6 @@ static void Init_FDCAN(void) {
   utlFDCAN3.FDCAN_TxHeader = TxHeader;
 }
 /* USER CODE END 4 */
-
 
 /**
   * @brief  Period elapsed callback in non blocking mode

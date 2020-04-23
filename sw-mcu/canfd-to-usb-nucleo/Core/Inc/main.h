@@ -59,26 +59,28 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SW2_Pin GPIO_PIN_0
+#define SW2_GPIO_Port GPIOA
+#define LED3_Pin GPIO_PIN_1
+#define LED3_GPIO_Port GPIOA
+#define SW1_Pin GPIO_PIN_4
+#define SW1_GPIO_Port GPIOA
+#define LED4_Pin GPIO_PIN_0
+#define LED4_GPIO_Port GPIOB
 #define STANDBY_2_Pin GPIO_PIN_1
 #define STANDBY_2_GPIO_Port GPIOB
-#define STANDBY_1_Pin GPIO_PIN_2
-#define STANDBY_1_GPIO_Port GPIOB
+#define STANDBY_3_Pin GPIO_PIN_2
+#define STANDBY_3_GPIO_Port GPIOB
 #define LED_HEARTBEAT_Pin GPIO_PIN_11
 #define LED_HEARTBEAT_GPIO_Port GPIOB
-#define STANDBY_3_Pin GPIO_PIN_15
-#define STANDBY_3_GPIO_Port GPIOB
-#define SW3_Pin GPIO_PIN_6
-#define SW3_GPIO_Port GPIOC
-#define LED_STATUS1_Pin GPIO_PIN_7
-#define LED_STATUS1_GPIO_Port GPIOC
-#define SW2_Pin GPIO_PIN_8
-#define SW2_GPIO_Port GPIOC
-#define SW1_Pin GPIO_PIN_9
-#define SW1_GPIO_Port GPIOC
-#define LED_STATUS2_Pin GPIO_PIN_9
-#define LED_STATUS2_GPIO_Port GPIOA
-#define LED_STATUS3_Pin GPIO_PIN_10
-#define LED_STATUS3_GPIO_Port GPIOA
+#define STANDBY_1_Pin GPIO_PIN_15
+#define STANDBY_1_GPIO_Port GPIOB
+#define LED1_Pin GPIO_PIN_9
+#define LED1_GPIO_Port GPIOC
+#define SW3_Pin GPIO_PIN_2
+#define SW3_GPIO_Port GPIOD
+#define LED2_Pin GPIO_PIN_7
+#define LED2_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
