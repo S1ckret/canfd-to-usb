@@ -26,7 +26,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "heartbeatTask.h"
-#include "usbTask.h"
 
 #include "utlFDCAN.h"
 #include "utlFDCAN_Task.h"
@@ -54,9 +53,6 @@
 utlFDCAN_CanModule_t utlFDCAN1;
 utlFDCAN_CanModule_t utlFDCAN2;
 utlFDCAN_CanModule_t utlFDCAN3;
-
-QueueHandle_t xQueueToUSB;
-QueueHandle_t xQueueToUART;
 
 QueueHandle_t xQueueToFDCAN1;
 QueueHandle_t xQueueToFDCAN2;
@@ -142,13 +138,12 @@ int main(void)
   /* creation of heartbeatTask */
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  xQueueToUSB = xQueueCreate(FDCAN_COUNT * FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
   xQueueToFDCAN1 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
   xQueueToFDCAN2 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
   xQueueToFDCAN3 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
 
   createHeartbeatTask();
-  createUsbTask();
+//  createUsbTask();
 
   FDCAN_Queue_Bundle1.FDCAN = &utlFDCAN1;
   FDCAN_Queue_Bundle1.Queue = xQueueToFDCAN1;
@@ -372,7 +367,7 @@ static void Init_FDCAN(void) {
   utlFDCAN_Start(&utlFDCAN3);
 
   FDCAN_TxHeaderTypeDef TxHeader;
-  TxHeader.Identifier = 0x529;
+  TxHeader.Identifier = 0x500;
   TxHeader.IdType = FDCAN_EXTENDED_ID;
   TxHeader.TxFrameType = FDCAN_DATA_FRAME;
   TxHeader.DataLength = FDCAN_DLC_BYTES_12;
@@ -384,11 +379,11 @@ static void Init_FDCAN(void) {
 
   utlFDCAN1.FDCAN_TxHeader = TxHeader;
 
-  TxHeader.Identifier = 0x52A;
+  TxHeader.Identifier = 0x501;
 
   utlFDCAN2.FDCAN_TxHeader = TxHeader;
 
-  TxHeader.Identifier = 0x52B;
+  TxHeader.Identifier = 0x503;
 
   utlFDCAN3.FDCAN_TxHeader = TxHeader;
 }

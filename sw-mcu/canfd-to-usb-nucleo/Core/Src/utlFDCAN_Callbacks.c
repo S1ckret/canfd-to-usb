@@ -30,8 +30,6 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
   static utlFDCAN_Data_t Data;
   static FDCAN_RxHeaderTypeDef RxHeader;
   static HAL_StatusTypeDef LastStatus_HAL = HAL_ERROR;
-  static BaseType_t xLastStatus_Os = pdFALSE;
-  static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
   /*
   FDCAN_IT_RX_FIFO0_MESSAGE_LOST
   FDCAN_IT_RX_FIFO0_FULL
@@ -42,20 +40,18 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     Error_Handler();
   }
 
-  xLastStatus_Os = xQueueSendToBackFromISR(xQueueToUSB, &Data, &xHigherPriorityTaskWoken);
-  if (xLastStatus_Os != pdPASS) {
-    Error_Handler();
-  }
-
   // TODO: Give semaphore to the led status task ???
-  if (hfdcan == &utlFDCAN1.FDCAN_Handle) {
+  if (Data.FDCAN_ID == '1') {
     HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+    HAL_FDCAN_AddMessageToTxFifoQ(&utlFDCAN1.FDCAN_Handle, &utlFDCAN1.FDCAN_TxHeader, (uint8_t*)&Data);
   }
-  else if (hfdcan == &utlFDCAN2.FDCAN_Handle) {
+  else if (Data.FDCAN_ID == '2') {
     HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+    HAL_FDCAN_AddMessageToTxFifoQ(&utlFDCAN2.FDCAN_Handle, &utlFDCAN2.FDCAN_TxHeader, (uint8_t*)&Data);
   }
-  else if (hfdcan == &utlFDCAN3.FDCAN_Handle) {
+  else if (Data.FDCAN_ID == '3') {
     HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
+    HAL_FDCAN_AddMessageToTxFifoQ(&utlFDCAN3.FDCAN_Handle, &utlFDCAN3.FDCAN_TxHeader, (uint8_t*)&Data);
   }
 }
 
