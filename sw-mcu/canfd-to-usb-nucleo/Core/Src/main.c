@@ -343,7 +343,7 @@ static void Init_FDCAN(void) {
   FDCAN_InitTypeDef Init;
   Init.ClockDivider = FDCAN_CLOCK_DIV1;
   Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
-  Init.Mode = FDCAN_MODE_INTERNAL_LOOPBACK;
+  Init.Mode = FDCAN_MODE_NORMAL;
   Init.AutoRetransmission = DISABLE;
   Init.TransmitPause = DISABLE;
   Init.ProtocolException = DISABLE;
