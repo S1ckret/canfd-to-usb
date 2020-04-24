@@ -47,18 +47,14 @@ void StartUsbTask(void *argument)
 {
   uint8_t usbStatus = HAL_ERROR;
   BaseType_t xStatus = pdFALSE;
-  utlFDCAN_Data_t data;
+  static utlFDCAN_Data_t data;
   for(;;)
   {
     if (uxQueueMessagesWaiting(xQueueToUSB)) {
       xStatus = xQueueReceive(xQueueToUSB, &data, TICKS_TO_WAIT_FOR_RECEIVE);
       if (xStatus == pdPASS) {
         /*Message from queue has been received.*/
-        usbStatus = CDC_Transmit_FS((uint8_t*)&data, sizeof(utlFDCAN_Data_t));
-        if (usbStatus != USBD_OK) {
-          /*Can not send USB packet.*/
-          Error_Handler();
-        }
+        while (CDC_Transmit_FS(&data.FDCAN_ID, sizeof(utlFDCAN_Data_t)));
       }
       else {
         /*Can not receive message from queue.*/
