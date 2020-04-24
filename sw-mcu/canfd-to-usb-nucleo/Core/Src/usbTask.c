@@ -23,7 +23,9 @@
 #include "FreeRTOS.h"
 #include "queue.h"
 
-extern QueueHandle_t queueToUSB;
+extern QueueHandle_t xQueueToUSB;
+
+extern void Error_Handler(void);
 
 void StartUsbTask(void *argument);
 
@@ -48,11 +50,11 @@ void StartUsbTask(void *argument)
   utlFDCAN_Data_t data;
   for(;;)
   {
-    if (uxQueueMessagesWaiting(queueToUSB)) {
-      xStatus = xQueueReceive(queueToUSB, &data, TICKS_TO_WAIT_FOR_RECEIVE);
+    if (uxQueueMessagesWaiting(xQueueToUSB)) {
+      xStatus = xQueueReceive(xQueueToUSB, &data, TICKS_TO_WAIT_FOR_RECEIVE);
       if (xStatus == pdPASS) {
         /*Message from queue has been received.*/
-        usbStatus = CDC_Transmit_FS((uint8_t*)&data, sizeof(utlFDCAN_Data_t) >> 2);
+        usbStatus = CDC_Transmit_FS((uint8_t*)&data, sizeof(utlFDCAN_Data_t));
         if (usbStatus != USBD_OK) {
           /*Can not send USB packet.*/
           Error_Handler();

@@ -42,7 +42,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     Error_Handler();
   }
 
-  xLastStatus_Os = xQueueSendToBackFromISR(xQueueToUART, &Data, &xHigherPriorityTaskWoken);
+  xLastStatus_Os = xQueueSendToBackFromISR(xQueueToUSB, &Data, &xHigherPriorityTaskWoken);
   if (xLastStatus_Os != pdPASS) {
     Error_Handler();
   }

@@ -154,7 +154,7 @@ int main(void)
   xQueueToFDCAN3 = xQueueCreate(FDCAN_QUEUE_SIZE, sizeof(utlFDCAN_Data_t));
 
   createHeartbeatTask();
-  createUartTask();
+  createUsbTask();
 
   FDCAN_Queue_Bundle1.FDCAN = &utlFDCAN1;
   FDCAN_Queue_Bundle1.Queue = xQueueToFDCAN1;

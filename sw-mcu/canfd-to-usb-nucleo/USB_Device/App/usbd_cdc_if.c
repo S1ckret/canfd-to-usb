@@ -247,17 +247,16 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, (uint8_t*)&Data);
-  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
 
   switch (Data.FDCAN_ID) {
     case FDCAN_MODULE_1_NUMBER:
-      xLastStatus_Os = xQueueSendToBackFromISR(xQueueToFDCAN1, Data.Payload, &xHigherPriorityTaskWoken);
+      xLastStatus_Os = xQueueSendToBackFromISR(xQueueToFDCAN1, (uint8_t*)&Data, &xHigherPriorityTaskWoken);
       break;
     case FDCAN_MODULE_2_NUMBER:
-      xLastStatus_Os = xQueueSendToBackFromISR(xQueueToFDCAN2, Data.Payload, &xHigherPriorityTaskWoken);
+      xLastStatus_Os = xQueueSendToBackFromISR(xQueueToFDCAN2, (uint8_t*)&Data, &xHigherPriorityTaskWoken);
       break;
     case FDCAN_MODULE_3_NUMBER:
-      xLastStatus_Os = xQueueSendToBackFromISR(xQueueToFDCAN3, Data.Payload, &xHigherPriorityTaskWoken);
+      xLastStatus_Os = xQueueSendToBackFromISR(xQueueToFDCAN3, (uint8_t*)&Data, &xHigherPriorityTaskWoken);
       break;
     default:
       /* Do not send to FDCAN modules*/
@@ -267,6 +266,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
     Error_Handler();
   }
 
+  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);
   /* USER CODE END 6 */
 }
