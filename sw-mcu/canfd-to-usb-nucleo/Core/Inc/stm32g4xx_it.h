@@ -57,11 +57,8 @@ void USB_LP_IRQHandler(void);
 void FDCAN1_IT0_IRQHandler(void);
 void FDCAN1_IT1_IRQHandler(void);
 void TIM2_IRQHandler(void);
-void FDCAN2_IT0_IRQHandler(void);
-void FDCAN2_IT1_IRQHandler(void);
 void FDCAN3_IT0_IRQHandler(void);
 void FDCAN3_IT1_IRQHandler(void);
-void LPUART1_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */
