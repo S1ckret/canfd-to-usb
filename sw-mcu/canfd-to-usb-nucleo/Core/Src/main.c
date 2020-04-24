@@ -406,7 +406,6 @@ static void Init_FDCAN(void) {
   Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
 
   utlFDCAN_Init(&utlFDCAN1, FDCAN1, &Init);
-  Init.Mode = FDCAN_MODE_NORMAL;
   utlFDCAN_Init(&utlFDCAN2, FDCAN2, &Init);
   utlFDCAN_Init(&utlFDCAN3, FDCAN3, &Init);
 

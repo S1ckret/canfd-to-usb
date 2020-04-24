@@ -9,8 +9,8 @@
 #include "stm32g474xx.h"
 #include "stm32g4xx_hal.h"
 
-#define LED_HEARTBEAT_Pin GPIO_PIN_11
-#define LED_HEARTBEAT_GPIO_Port GPIOB
+#define LED_HEARTBEAT_Pin GPIO_PIN_9
+#define LED_HEARTBEAT_GPIO_Port GPIOC
 
 void StartHeartbeatTask(void *argument);
 
