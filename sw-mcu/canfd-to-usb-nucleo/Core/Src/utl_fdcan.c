@@ -29,4 +29,19 @@ void utl_fdcan_init(struct utl_fdcan_handle_t ** fdcan_module, FDCAN_GlobalTypeD
 
   *fdcan_module = &fdcan_modules[handle_count];
   ++handle_count;
+
+  utl_fdcan_check_for_error_HAL(fdcan_module);
+}
+
+void utl_fdcan_check_for_error_HAL(struct utl_fdcan_handle_t * fdcan_module) {
+  if (fdcan_module->status_hal != HAL_OK)
+  {
+    utl_fdcan_error_handler();
+  }
+}
+
+static void utl_fdcan_error_handler(void) {
+  for (;;) {
+
+  }
 }

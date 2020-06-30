@@ -20,4 +20,6 @@ struct utl_fdcan_handle_t;
  * */
 void utl_fdcan_init(struct utl_fdcan_handle_t ** fdcan_module, FDCAN_GlobalTypeDef * Instance, FDCAN_InitTypeDef * Init);
 
+void utl_fdcan_check_for_error_HAL(struct utl_fdcan_handle_t * fdcan_module);
+
 #endif /* INC_UTL_FDCAN_H_ */
