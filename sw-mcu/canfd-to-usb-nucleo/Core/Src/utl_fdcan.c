@@ -22,6 +22,8 @@ static uint8_t handle_count = 0;
 static void utl_fdcan_error_handler(void);
 
 void utl_fdcan_init(struct utl_fdcan_handle_t ** fdcan_module, FDCAN_GlobalTypeDef * Instance, FDCAN_InitTypeDef * Init) {
+  /* Do not call init function more than @FDCAN_COUNT times.*/
+  if (handle_count == FDCAN_COUNT) return;
   fdcan_modules[handle_count].handle.Instance = Instance;
   fdcan_modules[handle_count].handle.Init = *Init;
 
