@@ -33,6 +33,11 @@ void utl_fdcan_init(struct utl_fdcan_handle_t ** fdcan_module, FDCAN_GlobalTypeD
   utl_fdcan_check_for_error_HAL(fdcan_module);
 }
 
+void utl_fdcan_activate_notification(struct utl_fdcan_handle_t * fdcan_module, uint32_t ActiveITs, uint32_t BufferIndexes) {
+  fdcan_module->status_hal = HAL_FDCAN_ActivateNotification(&fdcan_module->handle, ActiveITs, BufferIndexes);
+  utl_fdcan_check_for_error_HAL(fdcan_module);
+}
+
 void utl_fdcan_check_for_error_HAL(struct utl_fdcan_handle_t * fdcan_module) {
   if (fdcan_module->status_hal != HAL_OK)
   {
