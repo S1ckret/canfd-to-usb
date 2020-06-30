@@ -38,6 +38,11 @@ void utl_fdcan_activate_notification(struct utl_fdcan_handle_t * fdcan_module, u
   utl_fdcan_check_for_error_HAL(fdcan_module);
 }
 
+void utl_fdcan_start(struct utl_fdcan_handle_t * fdcan_module) {
+  fdcan_module->status_hal = HAL_FDCAN_Start(&fdcan_module->handle);
+  utl_fdcan_check_for_error_HAL(fdcan_module);
+}
+
 void utl_fdcan_check_for_error_HAL(struct utl_fdcan_handle_t * fdcan_module) {
   if (fdcan_module->status_hal != HAL_OK)
   {
