@@ -62,6 +62,7 @@
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
 extern TIM_HandleTypeDef htim1;
+extern UART_HandleTypeDef hlpuart1;
 
 /* USER CODE BEGIN EV */
 extern struct utl_fdcan_handle_t * hfdcan1;
@@ -317,6 +318,20 @@ void FDCAN3_IT1_IRQHandler(void)
   /* USER CODE BEGIN FDCAN3_IT1_IRQn 1 */
 
   /* USER CODE END FDCAN3_IT1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles LPUART1 global interrupt.
+  */
+void LPUART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN LPUART1_IRQn 0 */
+
+  /* USER CODE END LPUART1_IRQn 0 */
+  HAL_UART_IRQHandler(&hlpuart1);
+  /* USER CODE BEGIN LPUART1_IRQn 1 */
+
+  /* USER CODE END LPUART1_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
