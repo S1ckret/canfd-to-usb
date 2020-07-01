@@ -29,6 +29,8 @@
 #include "task.h"
 
 #include "utl_fdcan.h"
+
+#include "heartbeat_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,8 +51,6 @@
 UART_HandleTypeDef hlpuart1;
 
 /* USER CODE BEGIN PV */
-TaskHandle_t heartbeatTaskHandle;
-
 struct utl_fdcan_handle_t * hfdcan1;
 struct utl_fdcan_handle_t * hfdcan2;
 struct utl_fdcan_handle_t * hfdcan3;
@@ -60,7 +60,6 @@ struct utl_fdcan_handle_t * hfdcan3;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_LPUART1_UART_Init(void);
-void StartHeartbeatTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 static void FDCAN_Init(void);
@@ -125,9 +124,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  if (xTaskCreate ((TaskFunction_t)StartHeartbeatTask, "heartbeatTask", 128U, NULL, 24U, &heartbeatTaskHandle) != pdPASS) {
-    heartbeatTaskHandle = NULL;
-  }
+  run_heartbeat_task();
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -350,24 +347,6 @@ static void FDCAN_Init(void)
 }
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used 
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-void StartHeartbeatTask(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(200);
-    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
-  }
-  /* USER CODE END 5 */ 
-}
 
 /**
   * @brief  Period elapsed callback in non blocking mode
