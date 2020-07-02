@@ -24,6 +24,8 @@ void utl_fdcan_activate_notification(struct utl_fdcan_handle_t * fdcan_module, u
 
 void utl_fdcan_start(struct utl_fdcan_handle_t * fdcan_module);
 
+void utl_fdcan_set_tx_header(struct utl_fdcan_handle_t * fdcan_module, FDCAN_TxHeaderTypeDef * tx_header);
+
 void utl_fdcan_check_for_error_HAL(struct utl_fdcan_handle_t * fdcan_module);
 
 #endif /* INC_UTL_FDCAN_H_ */

@@ -38,6 +38,10 @@ void utl_fdcan_start(struct utl_fdcan_handle_t * fdcan_module) {
   utl_fdcan_check_for_error_HAL(fdcan_module);
 }
 
+void utl_fdcan_set_tx_header(struct utl_fdcan_handle_t * fdcan_module, FDCAN_TxHeaderTypeDef * tx_header) {
+  fdcan_module->tx_header = *tx_header;
+}
+
 void utl_fdcan_check_for_error_HAL(struct utl_fdcan_handle_t * fdcan_module) {
   if (fdcan_module->status_hal != HAL_OK)
   {
