@@ -344,6 +344,9 @@ static void FDCAN_Init(void)
   utl_fdcan_init(&hfdcan2, FDCAN2, &Init);
   utl_fdcan_init(&hfdcan3, FDCAN3, &Init);
 
+  utl_fdcan_activate_notification(hfdcan1, FDCAN_IT_LIST_RX_FIFO0, FDCAN_TX_BUFFER0);
+  utl_fdcan_activate_notification(hfdcan2, FDCAN_IT_LIST_RX_FIFO0, FDCAN_TX_BUFFER0);
+  utl_fdcan_activate_notification(hfdcan3, FDCAN_IT_LIST_RX_FIFO0, FDCAN_TX_BUFFER0);
 }
 /* USER CODE END 4 */
 
