@@ -335,6 +335,18 @@ void LPUART1_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  switch (GPIO_Pin) {
+  case GPIO_PIN_4: HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+    break;
+  case GPIO_PIN_2: HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+    break;
+  case GPIO_PIN_0: HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_1);
+    break;
+  default:
+    break;
+  }
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
