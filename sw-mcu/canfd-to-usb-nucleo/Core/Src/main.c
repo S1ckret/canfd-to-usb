@@ -351,6 +351,25 @@ static void FDCAN_Init(void)
   utl_fdcan_start(hfdcan1);
   utl_fdcan_start(hfdcan2);
   utl_fdcan_start(hfdcan3);
+
+  FDCAN_TxHeaderTypeDef tx_header;
+  tx_header.Identifier = 0xBEE;
+  tx_header.IdType = FDCAN_EXTENDED_ID;
+  tx_header.TxFrameType = FDCAN_DATA_FRAME;
+  tx_header.DataLength = FDCAN_DLC_BYTES_64;
+  tx_header.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+  tx_header.BitRateSwitch = FDCAN_BRS_OFF;
+  tx_header.FDFormat = FDCAN_FD_CAN;
+  tx_header.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+  tx_header.MessageMarker = 0;
+
+  utl_fdcan_set_tx_header(hfdcan1, &tx_header);
+
+  tx_header.Identifier = 0x123;
+  utl_fdcan_set_tx_header(hfdcan2, &tx_header);
+
+  tx_header.Identifier = 0x310;
+  utl_fdcan_set_tx_header(hfdcan3, &tx_header);
 }
 /* USER CODE END 4 */
 
