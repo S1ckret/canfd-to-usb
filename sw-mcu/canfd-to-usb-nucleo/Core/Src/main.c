@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 
 #include "utl_fdcan.h"
 
@@ -40,6 +41,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define QUEUE_ELEM_COUNT 8
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -54,6 +56,9 @@ UART_HandleTypeDef hlpuart1;
 struct utl_fdcan_handle_t * hfdcan1;
 struct utl_fdcan_handle_t * hfdcan2;
 struct utl_fdcan_handle_t * hfdcan3;
+
+QueueHandle_t queue_usb;
+QueueHandle_t queue_fdcan[FDCAN_COUNT];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -104,6 +109,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
   FDCAN_Init();
 
+  queue_usb = xQueueCreate(QUEUE_ELEM_COUNT, FDCAN_PAYLOAD * sizeof(uint8_t));
+  for (uint8_t i = 0; i < FDCAN_COUNT; ++i) {
+    queue_fdcan[i] = xQueueCreate(QUEUE_ELEM_COUNT, FDCAN_PAYLOAD * sizeof(uint8_t));
+  }
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
