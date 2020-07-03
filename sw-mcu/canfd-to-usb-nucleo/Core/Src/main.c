@@ -53,9 +53,7 @@
 UART_HandleTypeDef hlpuart1;
 
 /* USER CODE BEGIN PV */
-struct utl_fdcan_handle_t * hfdcan1;
-struct utl_fdcan_handle_t * hfdcan2;
-struct utl_fdcan_handle_t * hfdcan3;
+struct utl_fdcan_handle_t * hfdcan[FDCAN_COUNT];
 
 QueueHandle_t queue_usb;
 QueueHandle_t queue_fdcan[FDCAN_COUNT];
@@ -349,17 +347,14 @@ static void FDCAN_Init(void)
   Init.ExtFiltersNbr = 0;
   Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
 
-  utl_fdcan_init(&hfdcan1, FDCAN1, &Init);
-  utl_fdcan_init(&hfdcan2, FDCAN2, &Init);
-  utl_fdcan_init(&hfdcan3, FDCAN3, &Init);
+  utl_fdcan_init(&hfdcan[0], FDCAN1, &Init);
+  utl_fdcan_init(&hfdcan[1], FDCAN2, &Init);
+  utl_fdcan_init(&hfdcan[2], FDCAN3, &Init);
 
-  utl_fdcan_activate_notification(hfdcan1, FDCAN_IT_LIST_RX_FIFO0, FDCAN_TX_BUFFER0);
-  utl_fdcan_activate_notification(hfdcan2, FDCAN_IT_LIST_RX_FIFO0, FDCAN_TX_BUFFER0);
-  utl_fdcan_activate_notification(hfdcan3, FDCAN_IT_LIST_RX_FIFO0, FDCAN_TX_BUFFER0);
-
-  utl_fdcan_start(hfdcan1);
-  utl_fdcan_start(hfdcan2);
-  utl_fdcan_start(hfdcan3);
+  for (uint8_t i = 0; i < FDCAN_COUNT; ++i) {
+    utl_fdcan_activate_notification(hfdcan[i], FDCAN_IT_LIST_RX_FIFO0, FDCAN_TX_BUFFER0);
+    utl_fdcan_start(hfdcan[i]);
+  }
 
   FDCAN_TxHeaderTypeDef tx_header;
   tx_header.Identifier = 0xBEE;
@@ -372,13 +367,13 @@ static void FDCAN_Init(void)
   tx_header.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
   tx_header.MessageMarker = 0;
 
-  utl_fdcan_set_tx_header(hfdcan1, &tx_header);
+  utl_fdcan_set_tx_header(hfdcan[0], &tx_header);
 
   tx_header.Identifier = 0x123;
-  utl_fdcan_set_tx_header(hfdcan2, &tx_header);
+  utl_fdcan_set_tx_header(hfdcan[1], &tx_header);
 
   tx_header.Identifier = 0x310;
-  utl_fdcan_set_tx_header(hfdcan3, &tx_header);
+  utl_fdcan_set_tx_header(hfdcan[2], &tx_header);
 }
 /* USER CODE END 4 */
 
