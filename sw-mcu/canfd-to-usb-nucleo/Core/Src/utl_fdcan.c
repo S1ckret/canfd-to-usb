@@ -42,6 +42,18 @@ void utl_fdcan_set_tx_header(struct utl_fdcan_handle_t * fdcan_module, FDCAN_TxH
   fdcan_module->tx_header = *tx_header;
 }
 
+void utl_fdcan_send_payload(struct utl_fdcan_handle_t * fdcan_module) {
+  fdcan_module->status_hal =
+      HAL_FDCAN_AddMessageToTxFifoQ(&fdcan_module->handle, &fdcan_module->tx_header, fdcan_module->payload);
+
+  utl_fdcan_check_for_error_HAL(fdcan_module);
+}
+
+uint8_t * const utl_fdcan_get_payload(struct utl_fdcan_handle_t * fdcan_module) {
+  return fdcan_module->payload;
+}
+
+
 void utl_fdcan_check_for_error_HAL(struct utl_fdcan_handle_t * fdcan_module) {
   if (fdcan_module->status_hal != HAL_OK)
   {
