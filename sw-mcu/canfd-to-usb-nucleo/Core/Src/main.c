@@ -132,6 +132,7 @@ int main(void)
   /* Create the thread(s) */
   /* creation of defaultTask */
   run_heartbeat_task();
+  run_task_fdcan();
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
