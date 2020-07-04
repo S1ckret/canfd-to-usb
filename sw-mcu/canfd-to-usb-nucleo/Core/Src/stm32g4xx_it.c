@@ -332,20 +332,25 @@ void LPUART1_IRQHandler(void)
 
   /* USER CODE END LPUART1_IRQn 1 */
 }
-
+extern TaskHandle_t canfdTaskHandle;
 /* USER CODE BEGIN 1 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+  BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
   switch (GPIO_Pin) {
   case GPIO_PIN_4: HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-    break;
-  case GPIO_PIN_2: HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+    xTaskNotifyFromISR(canfdTaskHandle, 0, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
     break;
   case GPIO_PIN_0: HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_1);
+    xTaskNotifyFromISR(canfdTaskHandle, 1, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
+    break;
+  case GPIO_PIN_2: HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+    xTaskNotifyFromISR(canfdTaskHandle, 2, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
     break;
   default:
     break;
   }
+  portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
 }
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
