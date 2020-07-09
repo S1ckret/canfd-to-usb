@@ -31,7 +31,8 @@
 
 #include "utl_fdcan.h"
 
-#include "heartbeat_task.h"
+#include "task_heartbeat.h"
+#include "task_fdcan.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -131,7 +132,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  run_heartbeat_task();
+  run_task_heartbeat();
   run_task_fdcan();
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

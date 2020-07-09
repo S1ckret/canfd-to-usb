@@ -1,11 +1,11 @@
 /*
- * heartbeat_task.c
+ * task_heartbeat.c
  *
  *  Created on: 1 июл. 2020 г.
  *      Author: S1ckret
  */
 
-#include "heartbeat_task.h"
+#include "task_heartbeat.h"
 
 #include "stm32g4xx_hal.h"
 
@@ -20,7 +20,7 @@ TaskHandle_t heartbeatTaskHandle;
 static void StartHeartbeatTask(void *argument);
 
 
-void run_heartbeat_task(void)
+void run_task_heartbeat(void)
 {
   if (xTaskCreate ((TaskFunction_t)StartHeartbeatTask, "heartbeatTask", 128U, NULL, 24U, &heartbeatTaskHandle) != pdPASS) {
     heartbeatTaskHandle = NULL;
