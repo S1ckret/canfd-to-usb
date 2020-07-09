@@ -23,8 +23,11 @@
 #include "stm32g4xx_it.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stm32g4xx_hal.h"
+
 #include "utl_fdcan.h"
 #include "utl_fdcan_definition.h"
 /* USER CODE END Includes */
@@ -46,7 +49,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+static uint8_t data_received[FDCAN_PAYLOAD] = {0};
+static FDCAN_RxHeaderTypeDef rx_header;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,6 +70,9 @@ extern UART_HandleTypeDef hlpuart1;
 
 /* USER CODE BEGIN EV */
 extern struct utl_fdcan_handle_t * hfdcan[FDCAN_COUNT];
+
+extern TaskHandle_t usbTaskHandle;
+extern QueueHandle_t queue_usb;
 
 /* USER CODE END EV */
 
@@ -352,5 +359,30 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   }
   portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
 }
+
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
+{
+  BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+
+  if (RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) {
+    HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rx_header, data_received);
+    xQueueSendFromISR(queue_usb, data_received, &pxHigherPriorityTaskWoken);
+    xTaskNotifyFromISR(usbTaskHandle, FDCAN_PAYLOAD, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
+  }
+  portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
+}
+
+void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
+{
+  BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+  if (RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) {
+
+    HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO1, &rx_header, data_received);
+    xQueueSendFromISR(queue_usb, data_received, &pxHigherPriorityTaskWoken);
+    xTaskNotifyFromISR(usbTaskHandle, FDCAN_PAYLOAD, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
+  }
+  portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
+}
+
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
