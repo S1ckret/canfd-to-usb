@@ -53,6 +53,47 @@ uint8_t * const utl_fdcan_get_payload(struct utl_fdcan_handle_t * fdcan_module) 
   return fdcan_module->payload;
 }
 
+int8_t utl_fdcan_map_id_to_index(uint8_t id) {
+  int8_t index = -1;
+  switch (id) {
+#if (FDCAN_COUNT > 0)
+  case FDCAN_MODULE_1_ID: index = 0;
+    break;
+#endif
+#if (FDCAN_COUNT > 1)
+  case FDCAN_MODULE_2_ID: index = 1;
+    break;
+#endif
+#if (FDCAN_COUNT > 2)
+  case FDCAN_MODULE_3_ID: index = 2;
+    break;
+#endif
+  default: index = -1;
+    break;
+  }
+  return index;
+}
+
+uint8_t utl_fdcan_map_index_to_id(uint8_t index) {
+  uint8_t id = UINT8_MAX;
+  switch (index) {
+#if (FDCAN_COUNT > 0)
+  case 0: id = FDCAN_MODULE_1_ID;
+    break;
+#endif
+#if (FDCAN_COUNT > 1)
+  case 1: id = FDCAN_MODULE_2_ID;
+    break;
+#endif
+#if (FDCAN_COUNT > 2)
+  case 2: id = FDCAN_MODULE_3_ID;
+    break;
+#endif
+  default: id = UINT8_MAX;
+    break;
+  }
+  return id;
+}
 
 void utl_fdcan_check_for_error_HAL(struct utl_fdcan_handle_t * fdcan_module) {
   if (fdcan_module->status_hal != HAL_OK)

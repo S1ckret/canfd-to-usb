@@ -13,6 +13,19 @@
 #define FDCAN_PAYLOAD 64
 #define FDCAN_COUNT 3
 
+/* Id is 1 byte (uint8_t)  */
+#if (FDCAN_COUNT > 0)
+#define FDCAN_MODULE_1_ID '1'
+#endif
+
+#if (FDCAN_COUNT > 1)
+#define FDCAN_MODULE_2_ID '2'
+#endif
+
+#if (FDCAN_COUNT > 2)
+#define FDCAN_MODULE_3_ID '3'
+#endif
+
 struct utl_fdcan_handle_t;
 
 /*
@@ -29,6 +42,10 @@ void utl_fdcan_set_tx_header(struct utl_fdcan_handle_t * fdcan_module, FDCAN_TxH
 void utl_fdcan_send_payload(struct utl_fdcan_handle_t * fdcan_module);
 
 uint8_t * const utl_fdcan_get_payload(struct utl_fdcan_handle_t * fdcan_module);
+
+int8_t utl_fdcan_map_id_to_index(uint8_t id);
+
+uint8_t utl_fdcan_map_index_to_id(uint8_t index);
 
 void utl_fdcan_check_for_error_HAL(struct utl_fdcan_handle_t * fdcan_module);
 
