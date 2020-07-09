@@ -23,7 +23,11 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
 
+#include "utl_fdcan.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -114,7 +118,8 @@ uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
-
+extern QueueHandle_t queue_fdcan[FDCAN_COUNT];
+extern TaskHandle_t fdcanTaskHandle;
 /* USER CODE END EXPORTED_VARIABLES */
 
 /**
@@ -263,8 +268,16 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+  BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+  uint8_t index = utl_fdcan_map_id_to_index(Buf[0]);
+
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
+
+  xQueueSendFromISR(queue_fdcan[index], Buf, &pxHigherPriorityTaskWoken);
+  xTaskNotifyFromISR(fdcanTaskHandle, index, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
+
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+
   return (USBD_OK);
   /* USER CODE END 6 */
 }
