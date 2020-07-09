@@ -17,14 +17,14 @@
 extern QueueHandle_t queue_fdcan[FDCAN_COUNT];
 extern struct utl_fdcan_handle_t * hfdcan[FDCAN_COUNT];
 
-TaskHandle_t canfdTaskHandle;
+TaskHandle_t fdcanTaskHandle;
 
 static void StartFdcanTask(void *argument);
 
 void run_task_fdcan(void)
 {
-  if (xTaskCreate ((TaskFunction_t)StartFdcanTask, "fdcanTask", 128U, NULL, 22U, &canfdTaskHandle) != pdPASS) {
-    canfdTaskHandle = NULL;
+  if (xTaskCreate ((TaskFunction_t)StartFdcanTask, "fdcanTask", 128U, NULL, 22U, &fdcanTaskHandle) != pdPASS) {
+    fdcanTaskHandle = NULL;
   }
 }
 
