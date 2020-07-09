@@ -33,6 +33,7 @@
 
 #include "task_heartbeat.h"
 #include "task_fdcan.h"
+#include "task_usb.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -134,6 +135,7 @@ int main(void)
   /* creation of defaultTask */
   run_task_heartbeat();
   run_task_fdcan();
+  run_task_usb();
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
