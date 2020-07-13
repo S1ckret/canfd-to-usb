@@ -116,10 +116,6 @@ uint32_t circular_buf_size(circular_buf_handle cbuf) {
   return size;
 }
 
-void circular_buf_element_ready_callback(uint8_t* pElem) {
-  /* USER CODE*/
-}
-
 static void __circular_buf_advance_pointer(circular_buf_handle cbuf) {
   assert_param(cbuf);
 

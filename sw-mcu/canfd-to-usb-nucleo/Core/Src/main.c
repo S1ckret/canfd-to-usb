@@ -30,6 +30,7 @@
 #include "queue.h"
 
 #include "utl_fdcan.h"
+#include "circular_buf.h"
 
 #include "task_heartbeat.h"
 #include "task_fdcan.h"
@@ -44,6 +45,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define QUEUE_ELEM_COUNT 8
+#define BUFFER_ELEM_COUNT 4
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -59,6 +61,9 @@ struct utl_fdcan_handle_t * hfdcan[FDCAN_COUNT];
 
 QueueHandle_t queue_usb;
 QueueHandle_t queue_fdcan[FDCAN_COUNT];
+
+extern circular_buf_handle circular_buffer;
+uint8_t c_buf[(FDCAN_PAYLOAD + 1) * BUFFER_ELEM_COUNT];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -107,6 +112,10 @@ int main(void)
   MX_USB_Device_Init();
   MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  circular_buf_init(circular_buffer, c_buf, (FDCAN_PAYLOAD + 1) * BUFFER_ELEM_COUNT);
+  circular_buf_set_element_size(circular_buffer, (FDCAN_PAYLOAD + 1));
+
   FDCAN_Init();
 
   queue_usb = xQueueCreate(QUEUE_ELEM_COUNT, FDCAN_PAYLOAD * sizeof(uint8_t));

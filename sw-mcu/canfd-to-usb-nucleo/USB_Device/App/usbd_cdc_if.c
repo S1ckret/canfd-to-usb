@@ -28,6 +28,7 @@
 #include "queue.h"
 
 #include "utl_fdcan.h"
+#include "circular_buf.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -120,6 +121,7 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 extern QueueHandle_t queue_fdcan[FDCAN_COUNT];
 extern TaskHandle_t fdcanTaskHandle;
+extern circular_buf_handle circular_buffer;
 /* USER CODE END EXPORTED_VARIABLES */
 
 /**
@@ -268,18 +270,21 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-  BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
-  uint8_t index = utl_fdcan_map_id_to_index(Buf[0]);
-
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
 
-  xQueueSendFromISR(queue_fdcan[index], Buf, &pxHigherPriorityTaskWoken);
-  xTaskNotifyFromISR(fdcanTaskHandle, index, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
+  circular_buf_write(circular_buffer, Buf, *Len);
 
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
 
   return (USBD_OK);
   /* USER CODE END 6 */
+}
+
+void circular_buf_element_ready_callback(uint8_t* pElem) {
+  BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+  uint8_t index = utl_fdcan_map_id_to_index(*pElem);
+  xQueueSendFromISR(queue_fdcan[index], pElem + 1, &pxHigherPriorityTaskWoken);
+  xTaskNotifyFromISR(fdcanTaskHandle, index, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
 }
 
 /**
