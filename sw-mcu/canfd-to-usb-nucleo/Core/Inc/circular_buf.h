@@ -7,9 +7,7 @@ struct circular_buf;
 
 typedef struct circular_buf* circular_buf_handle;
 
-circular_buf_handle circular_buf_init(uint8_t* buf, uint32_t size);
-
-void circular_buf_free(circular_buf_handle cbuf);
+void circular_buf_init(circular_buf_handle cbuf, uint8_t* buf, uint32_t size);
 
 void circular_buf_reset(circular_buf_handle cbuf);
 

@@ -1,7 +1,6 @@
 #include "circular_buf.h"
 
 #include <stdint.h>
-#include <stdlib.h>
 
 #include "stm32g4xx_hal.h"
 
@@ -11,24 +10,18 @@ static void __circular_buf_advance_pointer(circular_buf_handle cbuf);
 static void __circular_buf_retreat_pointer(circular_buf_handle cbuf);
 static uint8_t* __circular_buf_get_elem(circular_buf_handle cbuf);
 
-circular_buf_handle circular_buf_init(uint8_t* buf, uint32_t size) {
-  assert_param(buf && size);
+static struct circular_buf cb;
 
-  circular_buf_handle handle = malloc(sizeof(struct circular_buf));
-  assert_param(handle);
+circular_buf_handle circular_buffer = &cb;
 
-  handle->buf = buf;
-  handle->capacity = size;
-  handle->element_size = 1;
+void circular_buf_init(circular_buf_handle cbuf, uint8_t* buf, uint32_t size) {
+  assert_param(cbuf && buf && size);
 
-  circular_buf_reset(handle);
+  cbuf->buf = buf;
+  cbuf->capacity = size;
+  cbuf->element_size = 1;
 
-  return handle;
-}
-
-void circular_buf_free(circular_buf_handle cbuf) {
-  assert_param(cbuf);
-  free(cbuf);
+  circular_buf_reset(cbuf);
 }
 
 void circular_buf_reset(circular_buf_handle cbuf) {
