@@ -35,6 +35,8 @@ void utl_fdcan_init(struct utl_fdcan_handle_t ** fdcan_module, FDCAN_GlobalTypeD
 
 void utl_fdcan_activate_notification(struct utl_fdcan_handle_t * fdcan_module, uint32_t ActiveITs, uint32_t BufferIndexes);
 
+void utl_fdcan_config_filter(struct utl_fdcan_handle_t * fdcan_module, FDCAN_FilterTypeDef *sFilterConfig);
+
 void utl_fdcan_start(struct utl_fdcan_handle_t * fdcan_module);
 
 void utl_fdcan_set_tx_header(struct utl_fdcan_handle_t * fdcan_module, FDCAN_TxHeaderTypeDef * tx_header);

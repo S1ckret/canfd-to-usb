@@ -343,7 +343,7 @@ static void FDCAN_Init(void)
 {
   FDCAN_InitTypeDef Init;
   Init.ClockDivider = FDCAN_CLOCK_DIV1;
-  Init.FrameFormat = FDCAN_FRAME_FD_NO_BRS;
+  Init.FrameFormat = FDCAN_FRAME_CLASSIC;
   Init.Mode = FDCAN_MODE_NORMAL;
   Init.AutoRetransmission = DISABLE;
   Init.TransmitPause = DISABLE;
@@ -364,7 +364,16 @@ static void FDCAN_Init(void)
   utl_fdcan_init(&hfdcan[1], FDCAN2, &Init);
   utl_fdcan_init(&hfdcan[2], FDCAN3, &Init);
 
+  FDCAN_FilterTypeDef filter;
+  filter.IdType = FDCAN_EXTENDED_ID;
+  filter.FilterIndex = 0;
+  filter.FilterType = FDCAN_FILTER_MASK;
+  filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  filter.FilterID1 = 0x0;
+  filter.FilterID2 = 0x0;
+
   for (uint8_t i = 0; i < FDCAN_COUNT; ++i) {
+    utl_fdcan_config_filter(hfdcan[i], &filter);
     utl_fdcan_activate_notification(hfdcan[i], FDCAN_IT_LIST_RX_FIFO0, FDCAN_TX_BUFFER0);
     utl_fdcan_start(hfdcan[i]);
   }

@@ -33,6 +33,12 @@ void utl_fdcan_activate_notification(struct utl_fdcan_handle_t * fdcan_module, u
   utl_fdcan_check_for_error_HAL(fdcan_module);
 }
 
+void utl_fdcan_config_filter(struct utl_fdcan_handle_t * fdcan_module, FDCAN_FilterTypeDef *sFilterConfig) {
+    HAL_FDCAN_ConfigGlobalFilter(&fdcan_module->handle, FDCAN_ACCEPT_IN_RX_FIFO0, FDCAN_ACCEPT_IN_RX_FIFO0, FDCAN_REJECT_REMOTE, FDCAN_REJECT_REMOTE);
+  fdcan_module->status_hal = HAL_FDCAN_ConfigFilter(&fdcan_module->handle, sFilterConfig);
+  utl_fdcan_check_for_error_HAL(fdcan_module);
+}
+
 void utl_fdcan_start(struct utl_fdcan_handle_t * fdcan_module) {
   fdcan_module->status_hal = HAL_FDCAN_Start(&fdcan_module->handle);
   utl_fdcan_check_for_error_HAL(fdcan_module);
