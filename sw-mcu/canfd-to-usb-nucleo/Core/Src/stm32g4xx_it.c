@@ -346,12 +346,18 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
   switch (GPIO_Pin) {
   case GPIO_PIN_4: HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+    hfdcan[0]->payload[0] = 'A';
+    utl_fdcan_send_payload(hfdcan[0]);
     xTaskNotifyFromISR(fdcanTaskHandle, 0, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
     break;
   case GPIO_PIN_0: HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_1);
+  hfdcan[1]->payload[0] = 'A';
+      utl_fdcan_send_payload(hfdcan[1]);
     xTaskNotifyFromISR(fdcanTaskHandle, 1, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
     break;
   case GPIO_PIN_2: HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+  hfdcan[2]->payload[0] = 'A';
+      utl_fdcan_send_payload(hfdcan[2]);
     xTaskNotifyFromISR(fdcanTaskHandle, 2, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
     break;
   default:
@@ -369,6 +375,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
     xQueueSendFromISR(queue_usb, data_received, &pxHigherPriorityTaskWoken);
     xTaskNotifyFromISR(usbTaskHandle, FDCAN_PAYLOAD, eSetValueWithOverwrite, &pxHigherPriorityTaskWoken);
   }
+  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
   portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
 }
 
